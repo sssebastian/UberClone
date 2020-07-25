@@ -1,0 +1,53 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+    defaultConfig {
+        applicationId "com.araoz.uberclone"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/main/assets/'] } }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'com.google.android.material:material:1.0.0' // design
+    implementation 'com.google.firebase:firebase-auth:19.1.0' // Integrando Firebase
+    implementation 'com.google.firebase:firebase-database:19.1.0'
+    // Base de datos no relacionada con Firebase
+    implementation 'com.google.android.gms:play-services-location:16.0.0' // Servicios de Google ♦╝
+    implementation 'com.firebase:geofire-android:2.2.0'  // ubicación mediante Geofire (lat-long)
+    implementation 'com.github.d-max:spots-dialog:1.1@aar' // animación en dialog
+    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+    implementation "com.google.android.libraries.places:places:1.1.0" // barra de busqueda
+    implementation 'com.google.maps.android:android-maps-utils:0.5' //busqueda por region
+
+    //RETROFIT ->Permite realizar peticiones http a google para asi trazar las rutas
+
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+
+    //ANIMACIONES CON LOTTIE
+    implementation 'com.airbnb.android:lottie:2.8.0'
+
+    implementation 'com.google.firebase:firebase-messaging:20.1.5'  //notificacion push
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation 'com.google.android.gms:play-services-maps:16.1.0'
+}
