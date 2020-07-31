@@ -21,9 +21,11 @@
         </service>
 
         <activity android:name=".activities.client.RequestDriverActivity"></activity>
+
         <activity
             android:name=".activities.client.DetailRequestActivity"
             android:parentActivityName=".activities.client.MapClientActivity" />
+
         <activity android:name=".activities.driver.MapDriverActivity" />
         <activity android:name=".activities.client.MapClientActivity" />
         <activity

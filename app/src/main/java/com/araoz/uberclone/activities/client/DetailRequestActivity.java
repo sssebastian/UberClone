@@ -83,6 +83,7 @@ public class DetailRequestActivity extends AppCompatActivity implements OnMapRea
 
         mTextViewOrigin = findViewById(R.id.textViewOrigin);
         mTextViewDestination = findViewById(R.id.textViewDestination);
+
         mTextViewTime = findViewById(R.id.textViewTime);
         mTextViewDistance = findViewById(R.id.textViewDistance);
 

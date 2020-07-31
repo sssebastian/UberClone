@@ -29,6 +29,7 @@ import com.araoz.uberclone.R;
 import com.araoz.uberclone.activities.MainActivity;
 import com.araoz.uberclone.providers.AuthProvider;
 import com.araoz.uberclone.providers.GeofireProvider;
+import com.araoz.uberclone.providers.TokenProvider;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -65,6 +66,8 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
     private boolean mIsConnect = false;
 
     private LatLng mCurrentLatLng;
+
+    private TokenProvider mTokenProvider;
 
     LocationCallback mLocationCallback = new LocationCallback() {
         @Override
@@ -117,6 +120,8 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
 
         mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
 
+        mTokenProvider = new TokenProvider();
+
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
 
@@ -136,6 +141,7 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
             }
         });
 
+        generateToken();
 
        /*mButtonLogout.setOnClickListener(new View.OnClickListener() {
            @Override
@@ -315,6 +321,10 @@ public class MapDriverActivity extends AppCompatActivity implements OnMapReadyCa
         Intent intent = new Intent(MapDriverActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
+    }
+
+    void generateToken(){
+        mTokenProvider.create(mAuthProvider.getId());
     }
 
 }

@@ -58,6 +58,7 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.firebase.database.DatabaseError;
 import com.google.maps.android.SphericalUtil;
+import com.araoz.uberclone.providers.TokenProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,6 +97,8 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
     private LatLng mDestinationLatLng;
     private GoogleMap.OnCameraIdleListener mCameraListener;
     private Button mButtonRequestDriver;
+
+    private TokenProvider mTokenProvider;
 
 
     LocationCallback mLocationCallback = new LocationCallback() {
@@ -153,6 +156,8 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
 
         mFusedLocation = LocationServices.getFusedLocationProviderClient(this);
 
+        mTokenProvider = new TokenProvider();
+
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
         mButtonRequestDriver = findViewById(R.id.btnRequestDriver);
@@ -171,6 +176,8 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
                 requestDriver();
             }
         });
+
+        generateToken();
 
         /*
         mAutocomplete = (AutocompleteSupportFragment) getSupportFragmentManager().findFragmentById(R.id.placeAutocompleteOrigin);
@@ -243,6 +250,9 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
             intent.putExtra("origin_lng", mOriginLatLng.longitude);
             intent.putExtra("destination_lat", mDestinationLatLng.latitude);
             intent.putExtra("destination_lng", mDestinationLatLng.longitude);
+            intent.putExtra("origin",mOrigin);
+            intent.putExtra("destination",mDestination);
+
             startActivity(intent);
         }
         else {
@@ -533,4 +543,10 @@ public class MapClientActivity extends AppCompatActivity implements OnMapReadyCa
         startActivity(intent);
         finish();
     }
+
+    void generateToken() {
+        mTokenProvider.create(mAuthProvider.getId());
+    }
+
+
 }
