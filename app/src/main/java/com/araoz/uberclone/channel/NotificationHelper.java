@@ -64,12 +64,11 @@ public class NotificationHelper extends ContextWrapper{
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public Notification.Builder getNotificationActions
-            (String title,
-             String body,
-             Uri soundUri,
-             Notification.Action acceptAction ,
-             Notification.Action cancelAction) {
+    public Notification.Builder getNotificationActions(String title,
+                                                       String body,
+                                                       Uri soundUri,
+                                                       Notification.Action acceptAction ,
+                                                       Notification.Action cancelAction) {
         return new Notification.Builder(getApplicationContext(), CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(body)
@@ -82,7 +81,8 @@ public class NotificationHelper extends ContextWrapper{
                         .bigText(body).setBigContentTitle(title));
     }
 
-    public NotificationCompat.Builder getNotificationOldAPI(String title, String body, PendingIntent intent, Uri soundUri) {
+    public NotificationCompat.Builder getNotificationOldAPI
+            (String title, String body, PendingIntent intent, Uri soundUri) {
         return new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(body)
