@@ -1,2 +1,2 @@
-# UberClone - SUO
+# UberClone
 
