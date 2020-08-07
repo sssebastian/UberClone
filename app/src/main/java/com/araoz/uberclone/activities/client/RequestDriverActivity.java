@@ -3,6 +3,7 @@ package com.araoz.uberclone.activities.client;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -65,7 +66,7 @@ public class RequestDriverActivity extends AppCompatActivity {
 
     private double mRadius = 0.1;
     private boolean mDriverFound = false;
-    private String  mIdDriverFound = "";
+    private String mIdDriverFound = "";
     private LatLng mDriverFoundLatLng;
     private NotificationProvider mNotificationProvider;
     private TokenProvider mTokenProvider;
@@ -73,6 +74,7 @@ public class RequestDriverActivity extends AppCompatActivity {
     private AuthProvider mAuthProvider;
 
     private GoogleApiProvider mGoogleApiProvider;
+    private ValueEventListener mListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,14 +103,15 @@ public class RequestDriverActivity extends AppCompatActivity {
         mExtraDestinationLat = getIntent().getDoubleExtra("destination_lat", 0);
         mExtraDestinationLng = getIntent().getDoubleExtra("destination_lng", 0);
 
-        mDestinationLatLng= new LatLng(mExtraDestinationLat, mExtraDestinationLng);
+        mDestinationLatLng = new LatLng(mExtraDestinationLat, mExtraDestinationLng);
 
         mOriginLatLng = new LatLng(mExtraOriginLat, mExtraOriginLng);
 
         getClosestDriver();
 
     }
-    private void getClosestDriver(){
+
+    private void getClosestDriver() {
         mGeofireProvider.getActiveDrivers(mOriginLatLng, mRadius).addGeoQueryEventListener(new GeoQueryEventListener() {
             @Override
             public void onKeyEntered(String key, GeoLocation location) {
@@ -119,7 +122,7 @@ public class RequestDriverActivity extends AppCompatActivity {
                     mDriverFoundLatLng = new LatLng(location.latitude, location.longitude);
                     mTextViewLookingFor.setText("CONDUCTOR ENCONTRADO\nESPERANDO RESPUESTA");
                     createClientBooking();
-                    sendNotification(durationText,distanceText);
+                    sendNotification(durationText, distanceText);
 
                     Log.d("DRIVER", "ID: " + mIdDriverFound);
                 }
@@ -146,8 +149,7 @@ public class RequestDriverActivity extends AppCompatActivity {
                         mTextViewLookingFor.setText("NO SE ENCONTRO UN CONDUCTOR");
                         Toast.makeText(RequestDriverActivity.this, "NO SE ENCONTRO UN CONDUCTOR", Toast.LENGTH_SHORT).show();
                         return;
-                    }
-                    else {
+                    } else {
                         getClosestDriver();
                     }
                 }
@@ -163,26 +165,26 @@ public class RequestDriverActivity extends AppCompatActivity {
 
     private void createClientBooking() {
 
-        mGoogleApiProvider.getDirections(mOriginLatLng,mDriverFoundLatLng).enqueue(new Callback<String>() {
+        mGoogleApiProvider.getDirections(mOriginLatLng, mDriverFoundLatLng).enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
-                try{
+                try {
 
                     JSONObject jsonObject = new JSONObject(response.body());
                     JSONArray jsonArray = jsonObject.getJSONArray("routes");
                     JSONObject route = jsonArray.getJSONObject(0);
                     JSONObject polylines = route.getJSONObject("overview_polyline");
                     String points = polylines.getString("points");
-                    JSONArray legs =  route.getJSONArray("legs");
+                    JSONArray legs = route.getJSONArray("legs");
                     JSONObject leg = legs.getJSONObject(0);
                     JSONObject distance = leg.getJSONObject("distance");
                     JSONObject duration = leg.getJSONObject("duration");
                     String distanceText = distance.getString("text");
                     String durationText = duration.getString("text");
 
-                    sendNotification(durationText,distanceText);
+                    sendNotification(durationText, distanceText);
 
-                } catch (Exception e){
+                } catch (Exception e) {
                     Log.d("Error", "Error encontrado " + e.getMessage());
                 }
             }
@@ -230,6 +232,7 @@ public class RequestDriverActivity extends AppCompatActivity {
                                     mClientBookingProvider.create(clientBooking).addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
                                         public void onSuccess(Void aVoid) {
+                                            checkStatusClientBooking();
                                             Toast.makeText(RequestDriverActivity.this, "La peticion  se ha creado correctamente", Toast.LENGTH_SHORT).show();
                                         }
                                     });
@@ -239,6 +242,7 @@ public class RequestDriverActivity extends AppCompatActivity {
                                 }
                             }
                         }
+
                         @Override
                         public void onFailure(Call<FCMResponse> call, Throwable t) {
                             Log.d("Error", "Error " + t.getMessage());
@@ -248,11 +252,50 @@ public class RequestDriverActivity extends AppCompatActivity {
                     Toast.makeText(RequestDriverActivity.this, "No se pudo enviar la notificacion porque el conductor no tiene un token de sesion", Toast.LENGTH_SHORT).show();
                 }
             }
+
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
+    }
+
+
+    private void checkStatusClientBooking() {
+        mListener = mClientBookingProvider.getStatus(mAuthProvider.getId()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+
+                    String status = dataSnapshot.getValue().toString();
+                    if (status.equals("accept")) {
+                        Intent intent = new Intent(RequestDriverActivity.this, MapClientBookingActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else if (status.equals("cancel")) {
+                        Toast.makeText(RequestDriverActivity.this, "El conductor no acepto el viaje", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(RequestDriverActivity.this, MapClientActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mListener != null) {
+            mClientBookingProvider.getStatus(mAuthProvider.getId()).removeEventListener(mListener);
+        }
+
     }
 
 }
